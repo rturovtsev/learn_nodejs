@@ -9,5 +9,48 @@
 		<input type="text" placeholder="Введите сообщение">
 		<button type="submit">Отправить</button>
 	</form>
+
+	<div id="msgs">
+
+	</div>
+
+	<script>
+		var form = document.forms[0],
+			input = form.elements[0],
+			msgs = document.getElementById("msgs");
+
+		form.onsubmit = function() {
+			var xhr = new XMLHttpRequest(),
+				url = "/publish",
+				txt = JSON.stringify({message:input.value});
+
+			xhr.open('POST', url, true);
+			xhr.send(txt);
+			input.value = "";
+
+			return false;
+		};
+
+		(function subscribe() {
+			var xhr = new XMLHttpRequest(),
+				url = "/subscribe";
+
+			xhr.open('GET', url, true);
+
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == 4) {
+					if (xhr.status == 200) {
+						msgs.appendChild(document.createTextNode(xhr.responseText));
+
+						subscribe();
+					} else {
+						setTimeout(subscribe, 500);
+					}
+				}
+			};
+
+			xhr.send(null);
+		})();
+	</script>
 </body>
 </html>
